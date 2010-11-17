@@ -12,7 +12,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License. 
+# limitations under the License.
 
 """ multivariative simplicial weighted interpolation and extrapolation.
 
@@ -273,7 +273,7 @@ def v_proj(a,S):
 
 def v_proj_or(a,S, p0):
     ''' Returns point, which is an 'a' projection on 'S' simplex plane.
-        'a' is a point, 'S' is given by a list of points
+        'a' is a point, 'S' is given by a list of points 
         If projection does not lie in simplex inner space - 'p0' is returned. '''
     ret=make_vector(len(a))
     ret[0]=p0;
