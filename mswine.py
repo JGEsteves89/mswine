@@ -824,7 +824,6 @@ if __name__ == '__main__':
         canvas3.pack({"side": "left"})
 
 
-        
     # setup and test
     from Tkinter import *   # initializing graphics
     root = Tk()
@@ -833,7 +832,7 @@ if __name__ == '__main__':
     fxi = get_linear_functions(t, x, s1)    # basis functions
     fyi = get_linear_functions(t, y, s1)    # basis functions
     test_1d()   # curve test
-    
+
     F = F_s       # interpolation scheme
     fi = get_linear_functions(xy, f_xy, s2) # basis functions
     test_2d()   # surface test
@@ -841,6 +840,5 @@ if __name__ == '__main__':
     F = F_s       # interpolation scheme
     fi = get_linear_functions(xyz, f_xyz, s3) # basis functions
     test_3d()   # 3-manifold test
-    
+
     root.mainloop()
-   
