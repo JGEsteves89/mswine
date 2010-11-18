@@ -272,9 +272,17 @@ def v_proj(a,S):
         return to_ret
 
 def v_proj_or(a,S, p0):
-    ''' Returns point, which is an 'a' projection on 'S' simplex plane.
-        'a' is a point, 'S' is given by a list of points 
-        If projection does not lie in simplex inner space - 'p0' is returned. '''
+    ''' Projection on a simplex inner space. If a projection on a simplex plane
+        does not lie in its inner space, function returns p0
+
+        Args:
+            a: Point to project.
+            S: Simplex given by a list of its points.
+
+	Returns:
+	    Point of projection or p0 if projection does not lie in a 
+            simplex inner space
+    '''
     ret=make_vector(len(a))
     ret[0]=p0;
 
@@ -366,10 +374,15 @@ def coords_in_simplex(sx,dot,pnt, xyz,Sx,  crd=[]):
 
 def get_nearest_simplex(dot,xyz,Sx,sx, best_pack):
     ''' Finds a simplex which is the nearest to a 'dot' point.
-        'sx' is an candiate simplex.
-        'xyz' is a list of points, 'Sx' is a list of point indexes, representing simplicial complex
-        'best_pack' - is an internal structure for passing found data
-        Function returns a list, first element of which represents nearest simplex index.'''
+        Args:
+            sx: A candiate simplex.
+            xyz: List of all points forming simplicial complex.
+            Sx: List of point indexes, representing simplicial complex.
+            best_pack: Structure for passing found data recoursively.
+
+        Returns:
+            List, first element of which represents nearest simplex index.
+    '''
     new_pack=[best_pack[0],copy_vector(best_pack[1]),copy_vector(best_pack[2])]
     new_S=[]
     for i in sx:
@@ -390,16 +403,32 @@ def get_nearest_simplex(dot,xyz,Sx,sx, best_pack):
 
 
 def get_constant_functions(xyz,f,Sx):
-    ''' this determines a constant basis functions in a form (fc|i,x -> y)
-        'xyz' - is a point set, 'f' - corresponding array of function values, Sx - a list of simplexes '''
+    ''' Determines a list of constant basis functions
+
+        Args:
+            xyz: Point set.
+            f: Corresponding array of function values.
+            Sx: List of simplexes 
+
+        Returns:
+            List of basis functions
+    '''
     def fi(i):
         return lambda dot: f[i]
     return [fi(i) for i in xrange(len(xyz))]
 
 
 def get_linear_functions(xyz,f,Sx):
-    ''' this determines a linear basis functions in a form (fl|i,x -> y)
-        'xyz' - is a point set, 'f' - corresponding array of function values, 'Sx' - a list of simplexes '''
+    ''' Determines a list of linear basis functions
+
+        Args:
+            xyz: Point set.
+            f: Corresponding array of function values.
+            Sx: List of simplexes 
+
+        Returns:
+            List of basis functions
+    '''
     if len(xyz)==0:
         return []
     dimm=len(xyz[0])
@@ -438,11 +467,19 @@ def get_linear_functions(xyz,f,Sx):
 
 def F_w(dot, xyz,Sx,base_f,s_k):
     ''' Average weighted interpolation
-    'dot' is an argument for interpolation function.
-    'xyz' - is a point set, 'Sx' - a list of simplexes, which is excessive 
-            for this particular algorithm yet let for consistancy.
-    'base_f' - a corresponding to 'xyz' list of basic functions.
-    's_k' - scalar weight function. '''
+        
+        Args:
+            dot: Argument for interpolation function 
+                 given by a list of variables
+            xyz: Data points.
+            Sx: List of simplexes, which is excessive 
+                for this particular algorithm yet let for consistancy.
+            base_f: Corresponding to 'xyz' list of basic functions.
+            s_k: Scalar weight function. 
+
+        Returns:
+            Value of interpolation function.
+    '''
     Up=0.0
     Dn=0.0
     for i in xrange(0,len(xyz)):
@@ -453,11 +490,19 @@ def F_w(dot, xyz,Sx,base_f,s_k):
 
 
 def F_l(dot, xyz,Sx,base_f,s_k):
-    ''' Linear simplex interpolation.
-    'dot' is an argument for interpolation function.
-    'xyz' - is a point set, 'Sx' - a list of simplexes.
-    'base_f' - a corresponding to 'xyz' list of basic functions.
-    's_k' - scalar weight function. '''
+    ''' Simplicial linear interpolation.
+        
+        Args:
+            dot: Argument for interpolation function 
+                 given by a list of variables
+            xyz: Data points.
+            Sx: List of simplexes, represeting simplicial complex
+            base_f: Corresponding to 'xyz' list of basic functions.
+            s_k: Scalar weight function. 
+
+        Returns:
+            Value of interpolation function.
+    '''
     DIMM=len(dot)
     Up=0.0
     Dn=0.0
@@ -477,11 +522,19 @@ def F_l(dot, xyz,Sx,base_f,s_k):
 
 
 def F_lex(dot, xyz,Sx,base_f,s_k):
-    ''' Linear simplex extrapolation
-    'dot' is an argument for interpolation function.
-    'xyz' - is a point set, 'Sx' - a list of simplexes.
-    'base_f' - a corresponding to 'xyz' list of basic functions.
-    's_k' - scalar weight function. '''   
+    ''' Simplicial linear extrapolation
+        
+        Args:
+            dot: Argument for interpolation function 
+                 given by a list of variables
+            xyz: Data points.
+            Sx: List of simplexes, represeting simplicial complex
+            base_f: Corresponding to 'xyz' list of basic functions.
+            s_k: Scalar weight function. 
+
+        Returns:
+            Value of extrapolation function.
+    '''
     best_pack=[100000,[],[]]    # I probably should make this better
     for sx in Sx:
         for i in xrange(0,len(sx)):
@@ -514,11 +567,20 @@ def F_lex(dot, xyz,Sx,base_f,s_k):
 
 
 def F_s(dot, xyz,Sx,base_f,s_k):
-    ''' Simplex weighted interpolation
-    'dot' is an argument for interpolation function.
-    'xyz' - is a point set, 'Sx' - a list of simplexes.
-    'base_f' - a corresponding to 'xyz' list of basic functions.
-    's_k' - scalar weight function. ''' 
+    ''' Simplicial weighted interpolation.
+
+        Args:
+            dot: Argument for interpolation function 
+                 given by a list of variables
+            xyz: Data points.
+            Sx: List of simplexes, represeting simplicial complex
+            base_f: Corresponding to 'xyz' list of basic functions.
+            s_k: Scalar weight function. 
+
+        Returns:
+            Value of interpolation function.
+    '''
+
     DIMM=len(dot)
     for sx in xrange(0,len(Sx)):
         crd=make_vector(DIMM)
@@ -532,10 +594,18 @@ def F_s(dot, xyz,Sx,base_f,s_k):
 
 def F_sex(dot, xyz,Sx,base_f,s_k):
     ''' Simplex weighted extrapolation
-    'dot' is an argument for interpolation function.
-    'xyz' - is a point set, 'Sx' - a list of simplexes.
-    'base_f' - a corresponding to 'xyz' list of basic functions.
-    's_k' - scalar weight function. ''' 
+
+        Args:
+            dot: Argument for interpolation function 
+                 given by a list of variables
+            xyz: Data points.
+            Sx: List of simplexes, represeting simplicial complex
+            base_f: Corresponding to 'xyz' list of basic functions.
+            s_k: Scalar weight function. 
+
+        Returns:
+            Value of extrapolation function.
+    '''
     best_pack=[100000,[],[]]
     for sx in Sx:
         for i in xrange(0,len(sx)):
@@ -550,12 +620,19 @@ def F_sex(dot, xyz,Sx,base_f,s_k):
 
 def get_inS(dot,prj,pnt_set,  xyz,Sx,base_f,s_k):
     ''' Gets a simplex interpolated value in a subsimplex
-    'dot' is an argument for interpolation function.
-    'prj' - is a current level projection of an 'dot'.
-    'pnt_set' - is a point set representing current level simplex.
-    'xyz' - is a point set, 'Sx' - a list of simplexes.
-    'base_f' - a corresponding to 'xyz' list of basic functions.
-    's_k' - scalar weight function. ''' 
+      
+        Args:
+            dot: Argument of interpolation function.
+            prj: Current level projection of a 'dot'.
+            pnt_set: Point set representing current level simplex.
+            xyz: Data point set.
+            Sx: Simplicial complex.
+            base_f: Corresponding to 'xyz' list of basic functions.
+            s_k: Scalar weight function. 
+
+        Returns:
+            Iterpolation value for 'dot' projection on a subsimplex
+    ''' 
     PSL=len(pnt_set)
     if PSL==1:
         return base_f[pnt_set[0]](dot)
@@ -581,11 +658,19 @@ def get_inS(dot,prj,pnt_set,  xyz,Sx,base_f,s_k):
 
 
 def F_b(dot, xyz,Sx,base_f,s_k):
-    ''' Baricentric simplicial interpolation
-    'dot' is an argument for interpolation function.
-    'xyz' - is a point set, 'Sx' - a list of simplexes.
-    'base_f' - a corresponding to 'xyz' list of basic functions.
-    's_k' - scalar weight function. ''' 
+    ''' Baricentric simplicial interpolation.
+
+        Args:
+            dot: Argument for interpolation function 
+                 given by a list of variables
+            xyz: Data points.
+            Sx: List of simplexes, represeting simplicial complex
+            base_f: Corresponding to 'xyz' list of basic functions.
+            s_k: Scalar weight function. 
+
+        Returns:
+            Value of interpolation function.
+    ''' 
     DIMM=len(dot)
     for sx in xrange(0,len(Sx)):
         crd=make_vector(DIMM)
@@ -669,7 +754,7 @@ if __name__ == '__main__':
         the_time = finish_time - start_time
         print 'curve calculated and drawn in: ', the_time, ' seconds'
           
-        canvas1.pack()
+        canvas1.pack({"side": "left"})
 
 
         
@@ -698,7 +783,7 @@ if __name__ == '__main__':
         the_time = finish_time - start_time
         print '100x100 surface calculated and drawn in: ', the_time, ' seconds'
             
-        canvas2.pack()
+        canvas2.pack({"side": "left"})
 
 
 
@@ -717,7 +802,7 @@ if __name__ == '__main__':
                 p = [j, i, 100]
                 F_xyz = F(p, xyz, s3, fi, k)
                 xb = 128 + i - j
-                yb = 28 + (i + j) / 2
+                yb = 29 + (i + j) / 2
                 canvas3.create_line(xb, yb, xb, yb+1, fill=red(F_xyz, 50))
 
                 p = [100-i, 100, 100-j]
@@ -736,7 +821,7 @@ if __name__ == '__main__':
         the_time = finish_time - start_time
         print '100x100x3 manifold calculated and drawn in: ', the_time, ' seconds'
             
-        canvas3.pack()
+        canvas3.pack({"side": "left"})
 
 
         
