@@ -97,12 +97,8 @@ def v_smul(s,a):
     return [s*ai for ai in a]
 
     
-v__dE3=[[[0, 0, 0], [0, 0, 1], [0, -1, 0]], [[0, 0, -1], [0, 0, 0], [1, 0, 0]], [[0, 1, 0], [-1, 0, 0], [0, 0, 0]]]
-v__dE4=[[[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1], [0, 0, -1, 0]], [[0, 0, 0, 0], [0, 0, 0, -1], [0, 0, 0, 0], [0, 1, 0, 0]], [[0, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 0]]], [[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, -1], [0, 0, 1, 0]], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], [[0, 0, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0], [-1, 0, 0, 0]], [[0, 0, -1, 0], [0, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]]], [[[0, 0, 0, 0], [0, 0, 0, 1], [0, 0, 0, 0], [0, -1, 0, 0]], [[0, 0, 0, -1], [0, 0, 0, 0], [0, 0, 0, 0], [1, 0, 0, 0]], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], [[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]], [[[0, 0, 0, 0], [0, 0, -1, 0], [0, 1, 0, 0], [0, 0, 0, 0]], [[0, 0, 1, 0], [0, 0, 0, 0], [-1, 0, 0, 0], [0, 0, 0, 0]], [[0, -1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]]]
 def v__E(a):
     ''' Levi-Civita symbol '''
-    if len(a)==3: return v__dE3[a[0]][a[1]][a[2]]
-    if len(a)==4: return v__dE4[a[0]][a[1]][a[2]][a[3]]
     n=0
     t=[]
     for ti in a:
@@ -191,7 +187,14 @@ def Solve(A, B):
 
 
 def Gauss(A, B):
-    ''' Gauss method implementation for linear system solving. Returns X for AX=B '''
+    ''' Gauss method implementation for linear system solving.
+        Args:
+            A: matrix,
+            B: vector
+            for equation AX=B
+
+        Returns:
+            X for AX=B '''
     N=len(B)
     X=[0]*N
     gA=[]
@@ -330,17 +333,31 @@ def v_proj_or(a,S, p0):
 ###################### common functions section
 
 def v_k(vx, s_k):
-    ''' Weight function for 'vx' vector calculated using 's_k' scalar weight function '''
+    ''' Weight function for 'vx' vector
+        Args:
+            vx: vector to weight.
+            s_k: scalar weight function.
+
+        Returns:
+            Weight of the vector
+    '''
     return reduce(operator.mul, [s_k(x) for x in vx])
 
 
 def coords_in_simplex(sx,dot,pnt, xyz,Sx,  crd=[]):
-    ''' Gets 'dot' point coordinates in an a basis set by simplex 1-edges.
-        'sx' is an index for basic simplex in an array of simplexes 'Sx'.
-        'pnt' is an index of an origin point in simplex.
-        'xyz' is a list of points, 'Sx' is a list of point indexes, representing simplicial complex
-        'crd' - is the return value for calculated coordinates.
-        Function returns 'True' is point is in a simplex, 'False' otherwise.'''
+    ''' Determines if a point is in simplex
+
+        Args:
+            dot: point coordinates in an a basis set by simplex 1-edges.
+            sx: index for basic simplex in an array of simplexes 'Sx'.
+            pnt: index of an origin point in simplex.
+            xyz: list of points,
+            Sx: list of point indexes, representing simplicial complex.
+            crd: the return value for calculated coordinates.
+
+        Returns:
+            'True' if point is in a simplex, 'False' otherwise.
+    '''
     DIMM=len(dot)
     A=make_matrix(DIMM)
     B=make_vector(DIMM)
