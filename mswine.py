@@ -41,7 +41,7 @@ __authors__ = [
 ]
 
 import operator
-
+import math
 
 ###################### data functions section
 
@@ -89,7 +89,7 @@ def v_dot(a,b):
     
 def v_len(a):
     ''' Vector length'''
-    return sum(map(lambda s: s**2, a))
+    return math.sqrt(sum(map(lambda s: s**2, a)))
 
     
 def v_smul(s,a):
@@ -415,8 +415,8 @@ def get_nearest_simplex(dot,xyz,Sx,sx, best_pack):
         for i in xrange(0,len(sx)):
             c_sx=copy_vector(sx)
             c_sx[i:i+1]=[]
-            new_pack=get_nearest_simplex(dot,xyz,Sx,c_sx, best_pack)
-    return new_pack
+            best_pack=get_nearest_simplex(dot,xyz,Sx,c_sx, best_pack)
+    return best_pack
 
 
 def get_constant_functions(xyz,f,Sx):
@@ -552,7 +552,7 @@ def F_lex(dot, xyz,Sx,base_f,s_k):
         Returns:
             Value of extrapolation function.
     '''
-    best_pack=[100000,[],[]]    # I probably should make this better
+    best_pack=[100000000,[],[]]    # I probably should make this better
     for sx in Sx:
         for i in xrange(0,len(sx)):
             c_sx=copy_vector(sx)
@@ -623,7 +623,7 @@ def F_sex(dot, xyz,Sx,base_f,s_k):
         Returns:
             Value of extrapolation function.
     '''
-    best_pack=[100000,[],[]]
+    best_pack=[10000000,[],[]]
     for sx in Sx:
         for i in xrange(0,len(sx)):
             c_sx=copy_vector(sx)
