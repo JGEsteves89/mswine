@@ -29,7 +29,7 @@ __authors__ = [
   '"Alexandr Kalenuk" <akalenuk@gmail.com>'
 ]
 
-EPS = 0.00001
+EPS = 1.0e-5
 
 
 def d(a, b,  xs):
@@ -37,7 +37,7 @@ def d(a, b,  xs):
 
 
 def sq(x1, y1, x2, y2, x3, y3):
-    return mswine.v_len(mswine.v_cross([ [x2-x1, x3-x1, 0], [y2-y1, y3-y1, 0] ]))
+    return abs(mswine.v_cross([ [x2-x1, x3-x1, 0], [y2-y1, y3-y1, 0] ])[2])
 
 
 def in_tri(x, y, i,  tris, xs):
@@ -47,6 +47,14 @@ def in_tri(x, y, i,  tris, xs):
     y2=xs[tris[i][1]][1]
     x3=xs[tris[i][2]][0]
     y3=xs[tris[i][2]][1]
+    if x<min(x1,x2,x3):
+        return False
+    if x>max(x1,x2,x3):
+        return False
+    if y<min(y1,y2,y3):
+        return False
+    if y>max(y1,y2,y3):
+        return False
     S=sq(x1,y1, x2,y2, x3,y3);
     s1=sq(x,y, x2,y2, x3,y3);
     s2=sq(x1,y1, x,y, x3,y3);
@@ -130,27 +138,22 @@ if __name__ == '__main__':
     ''' testing and demonstration part '''
         
     # data for the surface
-    xs = [[100.0, 300.0], [400.0, 350.0], [400.0,400.0], [100.0,400.0], [200.0,300.0]]         # coordinates
-    ys = [50.0, 100.0, 75.0, 25.0, 125.0]
-
-
-    def k(x):   # common weight function
-        if x!=0:
-            return 1/float(x)
-        else:
-            return 1.0e10  # to avoid zero division
-
+    xs = [[50.0, 302.0], [102.0, 454.0], [252.0,456.0], [208.0,358.0], [356.0,280.0], [422.0, 452.0]]         # coordinates
+    ys = [50.0, 75.0, 65.0, 105.0, 35.0, 50.0]
 
 
     from Tkinter import *   # initializing graphics
     root = Tk()
     canvas1 = Canvas(root, height = 512, width = 512, background = "white")
 
-    for x in xs:
+    for i in range(len(xs)):
+        x=xs[i]
+        y=ys[i]
         canvas1.create_line(x[0]-5, x[1]+5, x[0], x[1], fill="#ee3333", arrow="last")
         canvas1.create_line(x[0]+5, x[1]-5, x[0], x[1], fill="#ee3333", arrow="last")
         canvas1.create_line(x[0]+5, x[1]+5, x[0], x[1], fill="#ee3333", arrow="last")
         canvas1.create_line(x[0]-5, x[1]-5, x[0], x[1], fill="#ee3333", arrow="last")
+        canvas1.create_line(x[0], x[1], x[0], x[1]-y, fill="#3333ee")
     
     # triangulation
     tris=triangulate(xs)
@@ -158,9 +161,17 @@ if __name__ == '__main__':
         canvas1.create_line(xs[tri[0]][0], xs[tri[0]][1],  xs[tri[1]][0], xs[tri[1]][1], fill="#333333")
         canvas1.create_line(xs[tri[1]][0], xs[tri[1]][1],  xs[tri[2]][0], xs[tri[2]][1], fill="#333333")
         canvas1.create_line(xs[tri[2]][0], xs[tri[2]][1],  xs[tri[0]][0], xs[tri[0]][1], fill="#333333")
-        
+     
+
+    # reformating to mswine simplices
+    old_tris = [[n for n in tri] for tri in tris]
+    for tri in tris:
+        tri[0]+=1
+        tri[1]+=1
+        tri[2]+=1
+
     # basis functions
-    fi = get_linear_functions(xs, ys, tris)
+    fs = mswine.get_linear_functions(xs, ys, tris)
 
     # quasi-isometric plot
     def color(x, y):
@@ -171,11 +182,23 @@ if __name__ == '__main__':
         return ("#%02X" % x) + ("%02X" % y) + ("%02X" % y)
 
 
-    for i in range(256,512,2):
-        for j in range(512,2):
-            p = [i, j]
-            F_xy = F(p, xs, tris, fi, k)
-            canvas2.create_line(j, i, j, i-F_xy, color(i/2, j/2))
+    def sk(x):   # common weight function
+        if x>EPS:
+            return 1/float(x)
+        else:
+            return 1/EPS  # to avoid zero division
+
+
+    for i in range(256+1,482,2):
+        print '|',
+        for j in range(51-(i/20)*2,500-(i/20)*2,2):
+            dy = mswine.F_s([j, i], xs, tris, fs, sk)
+            if dy!=None:
+                canvas1.create_line(j, i-dy+1, j, i-dy, fill="#999999")
+                for k in range(len(old_tris)):
+                    if in_tri(float(j), float(i), k,  old_tris, xs):
+                        canvas1.create_line(j, i-dy+1, j, i-dy-1, fill=color(k*32+32, 128-k*16))
+                        break
 
 
     canvas1.pack({"side": "left"})
