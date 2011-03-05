@@ -814,7 +814,7 @@ if __name__ == '__main__':
         canvas3 = Canvas(root, height = 256, width = 256, background = "white")
         start_time = time.time()
 
-        for i in xrange(100): # quasi-isometric plot
+        for i in xrange(100): 
             for j in xrange(100):
                 p = [j, i, 100]
                 F_xyz = F(p, xyz, s3, fi, k)
