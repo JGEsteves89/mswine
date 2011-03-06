@@ -138,14 +138,18 @@ if __name__ == '__main__':
     ''' testing and demonstration part '''
         
     # data for the surface
-    xs = [[50.0, 302.0], [102.0, 454.0], [252.0,456.0], [208.0,358.0], [356.0,280.0], [422.0, 452.0]]         # coordinates
+    xs = [[50.0, 302.0], [102.0, 454.0], [252.0,456.0], [208.0,358.0], [386.0,280.0], [452.0, 452.0]]         # coordinates
     ys = [50.0, 75.0, 65.0, 105.0, 35.0, 50.0]
 
+    # data for deformation
+    obasis = [[170, 300, 50], [370, 320, 50], [250, 450, 50]]
+    nbasis = [[130, 270, 170], [400, 280, 180], [280, 490, 320]]
 
     from Tkinter import *   # initializing graphics
     root = Tk()
     canvas1 = Canvas(root, height = 512, width = 512, background = "white")
 
+    # draw surface data set
     for i in range(len(xs)):
         x=xs[i]
         y=ys[i]
@@ -157,47 +161,65 @@ if __name__ == '__main__':
     
     # triangulation
     tris=triangulate(xs)
+
+    # draw simplicial complex
     for tri in tris:
         canvas1.create_line(xs[tri[0]][0], xs[tri[0]][1],  xs[tri[1]][0], xs[tri[1]][1], fill="#333333")
         canvas1.create_line(xs[tri[1]][0], xs[tri[1]][1],  xs[tri[2]][0], xs[tri[2]][1], fill="#333333")
         canvas1.create_line(xs[tri[2]][0], xs[tri[2]][1],  xs[tri[0]][0], xs[tri[0]][1], fill="#333333")
-     
 
-    # reformating to mswine simplices
+    # reformate to mswine simplices
     old_tris = [[n for n in tri] for tri in tris]
     for tri in tris:
         tri[0]+=1
         tri[1]+=1
         tri[2]+=1
+   
+    # draw deformation basis
+    for i in range(len(obasis)):
+        canvas1.create_line(obasis[i][0], obasis[i][1],  obasis[i][0], obasis[i][1]-obasis[i][2], fill="#FFAAAA")
+        canvas1.create_line(nbasis[i][0], nbasis[i][1],  nbasis[i][0], nbasis[i][1]-nbasis[i][2], fill="#FFAAAA")
+        canvas1.create_line(obasis[i][0], obasis[i][1]-obasis[i][2],  nbasis[i][0], nbasis[i][1]-nbasis[i][2], fill="#AA2222", arrow="last", width=2)
 
     # basis functions
+    # for surface
     fs = mswine.get_linear_functions(xs, ys, tris)
 
-    # quasi-isometric plot
-    def color(x, y):
-        if x>255: x=255
-        if x<0: x=0
-        if y>255: y=255
-        if y<0: y=0
-        return ("#%02X" % x) + ("%02X" % y) + ("%02X" % y)
+    # for deformation
+    fdx = mswine.get_constant_functions(obasis, [nbasis[i][0]-obasis[i][0] for i in range(len(obasis))], [])
+    fdy = mswine.get_constant_functions(obasis, [nbasis[i][1]-obasis[i][1] for i in range(len(obasis))], [])
+    fdz = mswine.get_constant_functions(obasis, [nbasis[i][2]-obasis[i][2] for i in range(len(obasis))], [])
 
+
+    # quasi-isometric plot
+    colors=["#880000","#008800","#000088","#888800","#008888","#880088"];
 
     def sk(x):   # common weight function
         if x>EPS:
-            return 1/float(x)
+            return 1/float(x*x)
         else:
             return 1/EPS  # to avoid zero division
 
 
     for i in range(256+1,482,2):
         print '|',
-        for j in range(51-(i/20)*2,500-(i/20)*2,2):
+        for j in range(1+(i/20)*2,440+(i/20)*2,2):
             dy = mswine.F_s([j, i], xs, tris, fs, sk)
+
+            # deformation
+            ox = [j, i, dy]
+            ndx = mswine.F_w(ox, obasis, [], fdx, sk)
+            ndy = mswine.F_w(ox, obasis, [], fdy, sk)
+            ndz = mswine.F_w(ox, obasis, [], fdz, sk)
+            nx = [j+ndx, i+ndy, dy+ndz]
+
             if dy!=None:
-                canvas1.create_line(j, i-dy+1, j, i-dy, fill="#999999")
+                canvas1.create_line(j, i-dy+1, j, i-dy, fill="#999999") # surface
+                canvas1.create_line(nx[0], nx[1]-nx[2]+1, nx[0], nx[1]-nx[2], fill="#999999") # new surface
                 for k in range(len(old_tris)):
                     if in_tri(float(j), float(i), k,  old_tris, xs):
-                        canvas1.create_line(j, i-dy+1, j, i-dy-1, fill=color(k*32+32, 128-k*16))
+                        canvas1.create_line(j, i-dy+1, j, i-dy, fill=colors[k])
+                        canvas1.create_line(nx[0], nx[1]-nx[2]+1, nx[0], nx[1]-nx[2],  fill=colors[k])
                         break
 
 
