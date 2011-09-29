@@ -1,6 +1,7 @@
 import mswine
 import math
 import time
+import obj_io
 
 #!/usr/bin/python2.5
 #
@@ -133,7 +134,6 @@ def triangulate(xs):
     return tris[:-1]
 
 
-
 if __name__ == '__main__':
     ''' testing and demonstration part '''
         
@@ -201,9 +201,20 @@ if __name__ == '__main__':
             return 1/EPS  # to avoid zero division
 
 
-    for i in range(256+1,482,2):
+    h1 = 257
+    h2 = 481
+
+    sq_mesh=[]
+    
+
+    for i in range(h1, h2+1,2):
         print '|',
-        for j in range(1+(i/20)*2,440+(i/20)*2,2):
+        w1 = 1+(i/20)*2
+        w2 = 440+(i/20)*2-1
+        sq_mesh_line = []
+        
+        for j in range(w1, w2+1,2):
+
             dy = mswine.F_s([j, i], xs, tris, fs, sk)
 
             # deformation
@@ -213,6 +224,10 @@ if __name__ == '__main__':
             ndz = mswine.F_w(ox, obasis, [], fdz, sk)
             nx = [j+ndx, i+ndy, dy+ndz]
 
+            # export
+            sq_mesh_line += [nx]
+                            
+
             if dy!=None:
                 canvas1.create_line(j, i-dy+1, j, i-dy, fill="#999999") # surface
                 canvas1.create_line(nx[0], nx[1]-nx[2]+1, nx[0], nx[1]-nx[2], fill="#999999") # new surface
@@ -221,8 +236,11 @@ if __name__ == '__main__':
                         canvas1.create_line(j, i-dy+1, j, i-dy, fill=colors[k])
                         canvas1.create_line(nx[0], nx[1]-nx[2]+1, nx[0], nx[1]-nx[2],  fill=colors[k])
                         break
+    
+        sq_mesh += [sq_mesh_line]
 
-
+    obj_io.square_mesh_to_obj(sq_mesh, 'surface.obj')
+    
     canvas1.pack({"side": "left"})
     root.mainloop()
 
